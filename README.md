@@ -1,4 +1,5 @@
 # monobank-api-client
+This module is designed for quick interaction with the monobank API
 
 ## Name
 monobank_api_client
