@@ -17,11 +17,4 @@ MONO_WEBHOOK_URI = os.getenv(
     'MONO_WEBHOOK_URI', 'https://api.monobank.ua/personal/webhook'
 )
 
-MONO_ADDED = {
-    "detail": "Monobank added successfully."
-}
-MONO_CHANGED = {
-    "detail": "Monobank changed successfully."
-}
-
 DAY_UTC=86400   # 1 day (UNIX)
