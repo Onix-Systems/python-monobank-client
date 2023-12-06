@@ -20,9 +20,12 @@ class MonoManager:
     @classmethod
     @property
     def get_currency(cls) -> Tuple[int, Dict[str, Any]]:
-        _ = cls.session.get(MONO_CURRENCY_URI)
-        _.raise_for_status()
-        return _.json()
+        try:
+            _ = cls.session.get(MONO_CURRENCY_URI)
+            _.raise_for_status()
+            return _.json()
+        except Exception as exc:
+            raise exc
 
     def get_client_info(self, token: str):
         try:
