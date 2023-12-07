@@ -1,6 +1,6 @@
-from typing import Any, Dict, Tuple
 import requests
 from datetime import datetime
+from typing import Any, Dict, Tuple
 from .config import (
     MONO_CURRENCY_URI,
     MONO_CLIENT_INFO_URI,
@@ -27,7 +27,7 @@ class MonoManager:
         except Exception as exc:
             raise exc
 
-    def get_client_info(self, token: str):
+    def get_client_info(self, token: str) -> Tuple[int, Dict[str, Any]]:
         try:
             headers = {"X-Token": token}
             _ = self.session.get(
@@ -38,7 +38,7 @@ class MonoManager:
         except Exception as exc:
             raise exc
 
-    def get_balance(self, token: str):
+    def get_balance(self, token: str) -> Tuple[int, Dict[str, Any]]:
         try:
             payload = self.get_client_info(self, token)
             balance = {
@@ -48,7 +48,7 @@ class MonoManager:
         except Exception as exc:
             raise exc
         
-    def get_statement(self, token: str, period: int):
+    def get_statement(self, token: str, period: int) -> Tuple[int, Dict[str, Any]]:
         try:
             time_delta = int(datetime.now().timestamp()) - (period * DAY_UTC)
             headers = {"X-Token": token}
@@ -61,7 +61,7 @@ class MonoManager:
         except Exception as exc:
             raise exc
 
-    def create_webhook(self, token: str, webHookUrl: str):
+    def create_webhook(self, token: str, webHookUrl: str) -> Tuple[int, Dict[str, Any]]:
         try:
             headers = {"X-Token": token}
             _ = self.session.post(
