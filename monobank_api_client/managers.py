@@ -2,24 +2,77 @@ from typing import Any, Dict, Tuple
 import requests
 from datetime import datetime
 
+from .config import (
+    MONO_CURRENCY_URI,
+    MONO_CLIENT_INFO_URI,
+    MONO_STATEMENT,
+    MONO_WEBHOOK_URI,
+)
+
 
 class MonoManager:
 
-    def __init__(self, request):
+    def __init__(self, request, token=None):
         self.request = request
+        self._token = token
     
-    session = requests.Session()
+    _session = requests.Session()
+
+    _day_unix = 86400   # 1 day (UNIX)
     
-    _currency_uri = 'https://api.monobank.ua/bank/currency'
-    _client_info_uri = 'https://api.monobank.ua/personal/client-info'
-    _statement_uri = 'https://api.monobank.ua/personal/statement/0/'
-    _webhook_uri = 'https://api.monobank.ua/personal/webhook'
-    _day_utc = 86400   # 1 day (UNIX)
+    _mono_currency_uri = MONO_CURRENCY_URI
+    _mono_client_info_uri = MONO_CLIENT_INFO_URI
+    _mono_statement_uri = MONO_STATEMENT
+    _mono_webhook_uri = MONO_WEBHOOK_URI
+
+    @property
+    def token(self):
+        return self._token
+    
+    @token.setter
+    def token(self, new_token):
+        self._token = new_token
+
+    @property
+    def mono_currency_uri(self):
+        return self._mono_currency_uri
+    
+    @mono_currency_uri.setter
+    def mono_currency_uri(self, new_uri):
+        self._mono_currency_uri = new_uri
+
+    @property
+    def mono_client_info_uri(self):
+        return self._mono_client_info_uri
+    
+    @mono_client_info_uri.setter
+    def mono_client_info_uri(self, new_uri):
+        self._mono_client_info_uri = new_uri
+
+    @property
+    def mono_statement_uri(self):
+        return self._mono_statement_uri
+    
+    @mono_statement_uri.setter
+    def mono_statement_uri(self, new_uri):
+        self._mono_statement_uri = new_uri
+
+    @property
+    def mono_webhook_uri(self):
+        return self._mono_webhook_uri
+    
+    @mono_webhook_uri.setter
+    def mono_webhook_uri(self, new_uri):
+        self._mono_webhook_uri = new_uri
+
 
     @classmethod
+    @property
     def get_currency(cls) -> Tuple[int, Dict[str, Any]]:
         try:
-            response = cls.session.get(cls._currency_uri)
+            session = cls._session
+            uri = cls._mono_client_info_uri
+            response = session.get(uri)
             response.raise_for_status()
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
@@ -33,13 +86,13 @@ class MonoManager:
                 "detail": str(exc)
             }
 
-    def get_client_info(self, token: str) -> Tuple[int, Dict[str, Any]]:
+    def get_client_info(self) -> Tuple[int, Dict[str, Any]]:
         try:
+            session = self._session
+            token = self._token
+            uri = self._mono_client_info_uri
             headers = {"X-Token": token}
-            response = self.session.get(
-                self._client_info_uri,
-                headers=headers
-            )
+            response = session.get(uri, headers=headers)
             response.raise_for_status()
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
@@ -53,13 +106,13 @@ class MonoManager:
                 "detail": str(exc)
             }
 
-    def get_balance(self, token: str) -> Tuple[int, Dict[str, Any]]:
+    def get_balance(self) -> Tuple[int, Dict[str, Any]]:
         try:
+            session = self._session
+            token = self._token
+            uri = self._mono_client_info_uri
             headers = {"X-Token": token}
-            response = self.session.get(
-                self._client_info_uri,
-                headers=headers
-            )
+            response = session.get(uri, headers=headers)
             response.raise_for_status()
             balance = {
                 'balance': response.json()["accounts"][0]["balance"] / 100
@@ -76,14 +129,14 @@ class MonoManager:
                 "detail": str(exc)
             }
 
-    def get_statement(self, token: str, period: int) -> Tuple[int, Dict[str, Any]]:
+    def get_statement(self, period: int) -> Tuple[int, Dict[str, Any]]:
         try:
-            time_delta = int(datetime.now().timestamp()) - (period * self._day_utc)
+            session = self._session
+            token = self._token
+            uri = self._mono_statement_uri
             headers = {"X-Token": token}
-            response = self.session.get(
-                f"{self._statement_uri}{time_delta}/",
-                headers=headers
-            )
+            time_delta = int(datetime.now().timestamp()) - (period * self._day_unix)
+            response = session.get(f"{uri}{time_delta}/", headers=headers)
             response.raise_for_status()
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
@@ -97,14 +150,13 @@ class MonoManager:
                 "detail": str(exc)
             }
 
-    def create_webhook(self, token: str, webHookUrl: str) -> Tuple[int, Dict[str, Any]]:
-        try:
+    def create_webhook(self, webHookUrl: str) -> Tuple[int, Dict[str, Any]]:
+        try:            
+            session = self._session
+            token = self._token
+            uri = self._mono_webhook_uri
             headers = {"X-Token": token}
-            response = self.session.post(
-                self._webhook_uri,
-                data=webHookUrl,
-                headers=headers
-            )
+            response = session.post(uri, data=webHookUrl, headers=headers)
             response.raise_for_status()
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
