@@ -3,10 +3,10 @@ import requests
 from datetime import datetime
 
 from .config import (
-    MONO_CURRENCY_URI,
-    MONO_CLIENT_INFO_URI,
-    MONO_STATEMENT,
-    MONO_WEBHOOK_URI,
+    MONOBANK_CLIENT_INFO_URI,
+    MONOBANK_CURRENCY_URI,
+    MONOBANK_STATEMENT_URI,
+    MONOBANK_WEBHOOK_URI,
 )
 
 
@@ -20,10 +20,10 @@ class MonoManager:
 
     _day_unix = 86400   # 1 day (UNIX)
     
-    _mono_currency_uri = MONO_CURRENCY_URI
-    _mono_client_info_uri = MONO_CLIENT_INFO_URI
-    _mono_statement_uri = MONO_STATEMENT
-    _mono_webhook_uri = MONO_WEBHOOK_URI
+    _mono_currency_uri = MONOBANK_CURRENCY_URI
+    _mono_client_info_uri = MONOBANK_CLIENT_INFO_URI
+    _mono_statement_uri = MONOBANK_STATEMENT_URI
+    _mono_webhook_uri = MONOBANK_WEBHOOK_URI
 
     @property
     def token(self):
@@ -65,26 +65,26 @@ class MonoManager:
     def mono_webhook_uri(self, new_uri):
         self._mono_webhook_uri = new_uri
 
-
     @classmethod
     @property
     def get_currency(cls) -> Tuple[int, Dict[str, Any]]:
         try:
             session = cls._session
-            uri = cls._mono_client_info_uri
+            uri = cls._mono_currency_uri
             response = session.get(uri)
             response.raise_for_status()
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
-                "detail": str(exc),
                 "code": response.status_code,
+                "detail": str(exc),
             }
             return error_response
         except Exception as exc:
-            return {
+            exception = {
                 "detail": str(exc)
             }
+            return exception
 
     def get_client_info(self) -> Tuple[int, Dict[str, Any]]:
         try:
@@ -97,37 +97,27 @@ class MonoManager:
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
-                "detail": str(exc),
                 "code": response.status_code,
+                "detail": str(exc),
             }
             return error_response
         except Exception as exc:
-            return {
+            exception = {
                 "detail": str(exc)
             }
+            return exception
 
     def get_balance(self) -> Tuple[int, Dict[str, Any]]:
         try:
-            session = self._session
-            token = self._token
-            uri = self._mono_client_info_uri
-            headers = {"X-Token": token}
-            response = session.get(uri, headers=headers)
-            response.raise_for_status()
+            response = self.get_client_info()
+            code = response[0]
+            payload = response[1]
             balance = {
-                'balance': response.json()["accounts"][0]["balance"] / 100
+                'balance': payload["accounts"][0]["balance"] / 100
             }
-            return response.status_code, balance
-        except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "detail": str(exc),
-                "code": response.status_code,
-            }
-            return error_response
-        except Exception as exc:
-            return {
-                "detail": str(exc)
-            }
+            return code, balance
+        except Exception:
+            return response
 
     def get_statement(self, period: int) -> Tuple[int, Dict[str, Any]]:
         try:
@@ -141,14 +131,15 @@ class MonoManager:
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
-                "detail": str(exc),
                 "code": response.status_code,
+                "detail": str(exc),
             }
             return error_response
         except Exception as exc:
-            return {
+            exception = {
                 "detail": str(exc)
             }
+            return exception
 
     def create_webhook(self, webHookUrl: str) -> Tuple[int, Dict[str, Any]]:
         try:            
@@ -156,16 +147,17 @@ class MonoManager:
             token = self._token
             uri = self._mono_webhook_uri
             headers = {"X-Token": token}
-            response = session.post(uri, data=webHookUrl, headers=headers)
+            response = session.post(uri, headers=headers, data=webHookUrl)
             response.raise_for_status()
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
-                "detail": str(exc),
                 "code": response.status_code,
+                "detail": str(exc)
             }
             return error_response
         except Exception as exc:
-            return {
+            exception = {
                 "detail": str(exc)
             }
+            return exception
