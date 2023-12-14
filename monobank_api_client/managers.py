@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Tuple, Dict
 import requests
 from datetime import datetime
 
@@ -67,7 +67,7 @@ class MonoManager:
 
     @classmethod
     @property
-    def get_currency(cls) -> Tuple[int, Dict[str, Any]]:
+    def get_currency(cls) -> Tuple[int, Dict]:
         try:
             session = cls._session
             uri = cls._mono_currency_uri
@@ -86,7 +86,7 @@ class MonoManager:
             }
             return exception
 
-    def get_client_info(self) -> Tuple[int, Dict[str, Any]]:
+    def get_client_info(self) -> Tuple[int, Dict]:
         try:
             session = self._session
             token = self._token
@@ -107,7 +107,7 @@ class MonoManager:
             }
             return exception
 
-    def get_balance(self) -> Tuple[int, Dict[str, Any]]:
+    def get_balance(self) -> Tuple[int, Dict]:
         try:
             response = self.get_client_info()
             code = response[0]
@@ -119,7 +119,7 @@ class MonoManager:
         except Exception:
             return response
 
-    def get_statement(self, period: int) -> Tuple[int, Dict[str, Any]]:
+    def get_statement(self, period: int) -> Tuple[int, Dict]:
         try:
             session = self._session
             token = self._token
@@ -141,13 +141,13 @@ class MonoManager:
             }
             return exception
 
-    def create_webhook(self, webHookUrl: str) -> Tuple[int, Dict[str, Any]]:
+    def create_webhook(self, url: str) -> Tuple[int, Dict]:
         try:            
             session = self._session
             token = self._token
             uri = self._mono_webhook_uri
             headers = {"X-Token": token}
-            response = session.post(uri, headers=headers, data=webHookUrl)
+            response = session.post(uri, headers=headers, data=url)
             response.raise_for_status()
             return response.status_code, response.json()
         except requests.exceptions.HTTPError as exc:
