@@ -76,26 +76,27 @@ class MonoManager:
             }
             return exception
 
-    def get_currency(self) -> Tuple[int, Dict | List[Dict]]:
+    def get_currency(self) -> Tuple[Dict|List[Dict]]:
         try:
             session = self.session()
             uri = self.mono_currency_uri
             response = session.get(uri)
             code = response.status_code
             response.raise_for_status()
-            return code, response.json()
+            return response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
+                "code": code,
                 "detail": str(exc)
             }
-            return code, error_response
+            return error_response
         except Exception as exc:
             exception = {
                 "detail": str(exc)
             }
             return exception
 
-    def get_client_info(self) -> Tuple[int, Dict | List[Dict]]:
+    def get_client_info(self) -> Tuple[Dict|List[Dict]]:
         try:
             session = self.session()
             token = self.token
@@ -104,53 +105,55 @@ class MonoManager:
             response = session.get(uri, headers=headers)
             code = response.status_code
             response.raise_for_status()
-            return code, response.json()
+            return response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
+                "code": code,
                 "detail": str(exc)
             }
-            return code, error_response
+            return error_response
         except Exception as exc:
             exception = {
                 "detail": str(exc)
             }
             return exception
 
-    def get_balance(self) -> Tuple[int, Dict | List[Dict]]:
+    def get_balance(self) -> Tuple[Dict|List[Dict]]:
         try:
             response = self.get_client_info()
-            code = response[0]
-            payload = response[1]
             balance = {
-                'balance': payload["accounts"][0]["balance"] / 100
+                'balance': response["accounts"][0]["balance"] / 100
             }
-            return code, balance
+            return balance
         except Exception:
             return response
 
-    def get_statement(self, period: int) -> Tuple[int, Dict | List[Dict]]:
+    def get_statement(self, period: int) -> Tuple[Dict|List[Dict]]:
         try:
             session = self.session()
             token = self.token
             uri = self.mono_statement_uri
             headers = {"X-Token": token}
             time_delta = self.__date(period)
-            response = session.get(f"{uri}{time_delta}/", headers=headers)
+            response = session.get(
+                f"{uri}{time_delta}/", headers=headers
+            )
             code = response.status_code
             response.raise_for_status()
-            return code, response.json()
+            return response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
+                "code": code,
                 "detail": str(exc)
             }
-            return code, error_response
+            return error_response
         except Exception as exc:
             exception = {
                 "detail": str(exc)
             }
             return exception
 
-    def create_webhook(self, webhook: str) -> Tuple[int, Dict | List[Dict]]:
+    def create_webhook(self, webhook: str) -> Tuple[Dict|List[Dict]]:
         try:            
             session = self.session()
             token = self.token
@@ -159,12 +162,13 @@ class MonoManager:
             response = session.post(uri, headers=headers, data=webhook)
             code = response.status_code
             response.raise_for_status()
-            return code, response.json()
+            return response.json()
         except requests.exceptions.HTTPError as exc:
             error_response = {
+                "code": code,
                 "detail": str(exc)
             }
-            return code, error_response
+            return error_response
         except Exception as exc:
             exception = {
                 "detail": str(exc)
