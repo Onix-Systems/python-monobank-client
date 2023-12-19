@@ -65,7 +65,7 @@ class MonoManager:
         return requests.Session()
     
     @staticmethod
-    def __date(period: int) -> Tuple[int]:
+    def __date(period: int) -> Tuple[int|Dict]:
         _day = 86400   # 1 day (UNIX)
         try:
             time_delta = int(datetime.now().timestamp()) - (period * _day)
