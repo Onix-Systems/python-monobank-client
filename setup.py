@@ -8,7 +8,7 @@ def readme():
 
 setup(
   name='monobank_api_client',
-  version='0.1.7',
+  version='0.1.8',
   author='ihor.sotnyk',
   author_email='ihor.sotnyk@onix-systems.com',
   description='This module is designed for quick interaction with the monobank API.',

@@ -1,5 +1,5 @@
-from typing import Tuple, Dict, List
 import requests
+from typing import Dict, List
 from datetime import datetime
 
 from .config import (
@@ -61,11 +61,11 @@ class MonoManager:
         self._mono_webhook_uri = new_uri
 
     @classmethod
-    def session(cls) -> requests.Session:
+    def session(cls) -> requests.sessions.Session:
         return requests.Session()
     
     @staticmethod
-    def __date(period: int) -> Tuple[int|Dict]:
+    def __date(period: int) -> int|Dict:
         _day = 86400   # 1 day (UNIX)
         try:
             time_delta = int(datetime.now().timestamp()) - (period * _day)
@@ -76,7 +76,7 @@ class MonoManager:
             }
             return exception
 
-    def get_currency(self) -> Tuple[Dict|List[Dict]]:
+    def get_currency(self) -> List[Dict]|Dict:
         try:
             session = self.session()
             uri = self.mono_currency_uri
@@ -96,7 +96,7 @@ class MonoManager:
             }
             return exception
 
-    def get_client_info(self) -> Tuple[Dict|List[Dict]]:
+    def get_client_info(self) -> Dict:
         try:
             session = self.session()
             token = self.token
@@ -118,7 +118,7 @@ class MonoManager:
             }
             return exception
 
-    def get_balance(self) -> Tuple[Dict|List[Dict]]:
+    def get_balance(self) -> Dict:
         try:
             response = self.get_client_info()
             balance = {
@@ -128,7 +128,7 @@ class MonoManager:
         except Exception:
             return response
 
-    def get_statement(self, period: int) -> Tuple[Dict|List[Dict]]:
+    def get_statement(self, period: int) -> List[Dict]|Dict:
         try:
             session = self.session()
             token = self.token
@@ -153,13 +153,15 @@ class MonoManager:
             }
             return exception
 
-    def create_webhook(self, webhook: str) -> Tuple[Dict|List[Dict]]:
+    def create_webhook(self, webhook: str) -> Dict:
         try:            
             session = self.session()
             token = self.token
             uri = self.mono_webhook_uri
             headers = {"X-Token": token}
-            response = session.post(uri, headers=headers, data=webhook)
+            response = session.post(
+                uri, headers=headers, data=webhook
+            )
             code = response.status_code
             response.raise_for_status()
             return response.json()
