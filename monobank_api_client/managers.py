@@ -1,5 +1,5 @@
 import requests
-from typing import Dict, List
+from typing import Dict
 from datetime import datetime
 
 from .config import (
@@ -21,7 +21,7 @@ class MonoManager:
     _mono_webhook_uri = MONOBANK_WEBHOOK_URI
 
     @property
-    def token(self):
+    def token(self) -> str:
         return self._token
     
     @token.setter
@@ -29,7 +29,7 @@ class MonoManager:
         self._token = new_token
 
     @property
-    def mono_currency_uri(self):
+    def mono_currency_uri(self) -> str:
         return self._mono_currency_uri
     
     @mono_currency_uri.setter
@@ -37,7 +37,7 @@ class MonoManager:
         self._mono_currency_uri = new_uri
 
     @property
-    def mono_client_info_uri(self):
+    def mono_client_info_uri(self) -> str:
         return self._mono_client_info_uri
     
     @mono_client_info_uri.setter
@@ -45,7 +45,7 @@ class MonoManager:
         self._mono_client_info_uri = new_uri
 
     @property
-    def mono_statement_uri(self):
+    def mono_statement_uri(self) -> str:
         return self._mono_statement_uri
     
     @mono_statement_uri.setter
@@ -53,7 +53,7 @@ class MonoManager:
         self._mono_statement_uri = new_uri
 
     @property
-    def mono_webhook_uri(self):
+    def mono_webhook_uri(self) -> str:
         return self._mono_webhook_uri
     
     @mono_webhook_uri.setter
@@ -65,10 +65,13 @@ class MonoManager:
         return requests.Session()
     
     @staticmethod
-    def __date(period: int) -> int|Dict:
+    def __date(period: int) -> Dict:
         _day = 86400   # 1 day (UNIX)
         try:
-            time_delta = int(datetime.now().timestamp()) - (period * _day)
+            delta = int(datetime.now().timestamp()) - (period * _day)
+            time_delta = {
+                "time_delta": delta
+            }
             return time_delta
         except Exception as exc:
             exception = {
@@ -76,14 +79,18 @@ class MonoManager:
             }
             return exception
 
-    def get_currency(self) -> List[Dict]|Dict:
+    def get_currency(self) -> Dict:
         try:
             session = self.session()
             uri = self.mono_currency_uri
             response = session.get(uri)
             code = response.status_code
             response.raise_for_status()
-            return response.json()
+            payload = {
+                "code": code,
+                "detail": response.json()
+            }
+            return payload
         except requests.exceptions.HTTPError as exc:
             error_response = {
                 "code": code,
@@ -105,7 +112,11 @@ class MonoManager:
             response = session.get(uri, headers=headers)
             code = response.status_code
             response.raise_for_status()
-            return response.json()
+            payload = {
+                "code": code,
+                "detail": response.json()
+            }
+            return payload
         except requests.exceptions.HTTPError as exc:
             error_response = {
                 "code": code,
@@ -120,27 +131,37 @@ class MonoManager:
 
     def get_balance(self) -> Dict:
         try:
-            response = self.get_client_info()
+            client_info = self.get_client_info()
+            code = client_info.get("code")
+            data = client_info.get("detail")
             balance = {
-                'balance': response["accounts"][0]["balance"] / 100
+                'balance': data["accounts"][0]["balance"] / 100
             }
-            return balance
+            payload = {
+                "code": code,
+                "detail": balance
+            }
+            return payload
         except Exception:
-            return response
+            return client_info
 
-    def get_statement(self, period: int) -> List[Dict]|Dict:
+    def get_statement(self, period: int) -> Dict:
         try:
             session = self.session()
             token = self.token
             uri = self.mono_statement_uri
             headers = {"X-Token": token}
-            time_delta = self.__date(period)
+            time_delta = self.__date(period).get("time_delta")
             response = session.get(
                 f"{uri}{time_delta}/", headers=headers
             )
             code = response.status_code
             response.raise_for_status()
-            return response.json()
+            payload = {
+                "code": code,
+                "detail": response.json()
+            }
+            return payload
         except requests.exceptions.HTTPError as exc:
             error_response = {
                 "code": code,
@@ -159,12 +180,14 @@ class MonoManager:
             token = self.token
             uri = self.mono_webhook_uri
             headers = {"X-Token": token}
-            response = session.post(
-                uri, headers=headers, data=webhook
-            )
+            response = session.post(uri, headers=headers, data=webhook)
             code = response.status_code
             response.raise_for_status()
-            return response.json()
+            payload = {
+                "code": code,
+                "detail": response.json()
+            }
+            return payload
         except requests.exceptions.HTTPError as exc:
             error_response = {
                 "code": code,
