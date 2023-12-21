@@ -11,10 +11,9 @@ from .config import (
 
 
 class MonoManager:
-
     def __init__(self, token=None):
         self._token = token
-    
+
     _mono_currency_uri = MONOBANK_CURRENCY_URI
     _mono_client_info_uri = MONOBANK_CLIENT_INFO_URI
     _mono_statement_uri = MONOBANK_STATEMENT_URI
@@ -23,7 +22,7 @@ class MonoManager:
     @property
     def token(self) -> str:
         return self._token
-    
+
     @token.setter
     def token(self, new_token):
         self._token = new_token
@@ -31,7 +30,7 @@ class MonoManager:
     @property
     def mono_currency_uri(self) -> str:
         return self._mono_currency_uri
-    
+
     @mono_currency_uri.setter
     def mono_currency_uri(self, new_uri):
         self._mono_currency_uri = new_uri
@@ -39,7 +38,7 @@ class MonoManager:
     @property
     def mono_client_info_uri(self) -> str:
         return self._mono_client_info_uri
-    
+
     @mono_client_info_uri.setter
     def mono_client_info_uri(self, new_uri):
         self._mono_client_info_uri = new_uri
@@ -47,7 +46,7 @@ class MonoManager:
     @property
     def mono_statement_uri(self) -> str:
         return self._mono_statement_uri
-    
+
     @mono_statement_uri.setter
     def mono_statement_uri(self, new_uri):
         self._mono_statement_uri = new_uri
@@ -55,7 +54,7 @@ class MonoManager:
     @property
     def mono_webhook_uri(self) -> str:
         return self._mono_webhook_uri
-    
+
     @mono_webhook_uri.setter
     def mono_webhook_uri(self, new_uri):
         self._mono_webhook_uri = new_uri
@@ -63,20 +62,16 @@ class MonoManager:
     @classmethod
     def session(cls) -> requests.sessions.Session:
         return requests.Session()
-    
+
     @staticmethod
     def __date(period: int) -> Dict:
-        _day = 86400   # 1 day (UNIX)
+        _day = 86400  # 1 day (UNIX)
         try:
             delta = int(datetime.now().timestamp()) - (period * _day)
-            time_delta = {
-                "time_delta": delta
-            }
+            time_delta = {"time_delta": delta}
             return time_delta
         except Exception as exc:
-            exception = {
-                'detail': str(exc)
-            }
+            exception = {"detail": str(exc)}
             return exception
 
     def get_currency(self) -> Dict:
@@ -86,21 +81,13 @@ class MonoManager:
             response = session.get(uri)
             code = response.status_code
             response.raise_for_status()
-            payload = {
-                "code": code,
-                "detail": response.json()
-            }
+            payload = {"code": code, "detail": response.json()}
             return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "code": code,
-                "detail": str(exc)
-            }
+            error_response = {"code": code, "detail": str(exc)}
             return error_response
         except Exception as exc:
-            exception = {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
             return exception
 
     def get_client_info(self) -> Dict:
@@ -112,21 +99,13 @@ class MonoManager:
             response = session.get(uri, headers=headers)
             code = response.status_code
             response.raise_for_status()
-            payload = {
-                "code": code,
-                "detail": response.json()
-            }
+            payload = {"code": code, "detail": response.json()}
             return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "code": code,
-                "detail": str(exc)
-            }
+            error_response = {"code": code, "detail": str(exc)}
             return error_response
         except Exception as exc:
-            exception = {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
             return exception
 
     def get_balance(self) -> Dict:
@@ -134,13 +113,8 @@ class MonoManager:
             client_info = self.get_client_info()
             code = client_info.get("code")
             data = client_info.get("detail")
-            balance = {
-                'balance': data["accounts"][0]["balance"] / 100
-            }
-            payload = {
-                "code": code,
-                "detail": balance
-            }
+            balance = {"balance": data["accounts"][0]["balance"] / 100}
+            payload = {"code": code, "detail": balance}
             return payload
         except Exception:
             return client_info
@@ -152,30 +126,20 @@ class MonoManager:
             uri = self.mono_statement_uri
             headers = {"X-Token": token}
             time_delta = self.__date(period).get("time_delta")
-            response = session.get(
-                f"{uri}{time_delta}/", headers=headers
-            )
+            response = session.get(f"{uri}{time_delta}/", headers=headers)
             code = response.status_code
             response.raise_for_status()
-            payload = {
-                "code": code,
-                "detail": response.json()
-            }
+            payload = {"code": code, "detail": response.json()}
             return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "code": code,
-                "detail": str(exc)
-            }
+            error_response = {"code": code, "detail": str(exc)}
             return error_response
         except Exception as exc:
-            exception = {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
             return exception
 
     def create_webhook(self, webhook: str) -> Dict:
-        try:            
+        try:
             session = self.session()
             token = self.token
             uri = self.mono_webhook_uri
@@ -183,19 +147,11 @@ class MonoManager:
             response = session.post(uri, headers=headers, data=webhook)
             code = response.status_code
             response.raise_for_status()
-            payload = {
-                "code": code,
-                "detail": response.json()
-            }
+            payload = {"code": code, "detail": response.json()}
             return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "code": code,
-                "detail": str(exc)
-            }
+            error_response = {"code": code, "detail": str(exc)}
             return error_response
         except Exception as exc:
-            exception = {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
             return exception
