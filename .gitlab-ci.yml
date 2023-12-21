@@ -1,3 +1,17 @@
+stages:
+  - lint
+  - sonarqube-check
+
+lint:
+  variables:
+    PYTHON_VERSION: "3.11"
+  image: python:${PYTHON_VERSION}
+  stage: lint
+  script:
+    - pip install --upgrade pip
+    - pip install ruff
+    - ruff check --output-format=gitlab .
+
 sonarqube-check:
   image:
     name: sonarsource/sonar-scanner-cli:latest
