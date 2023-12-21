@@ -1,6 +1,5 @@
 stages:
   - lint
-  - sonarqube-check
 
 lint:
   variables:
