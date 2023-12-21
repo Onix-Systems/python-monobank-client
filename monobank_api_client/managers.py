@@ -1,119 +1,157 @@
-from typing import Any, Dict, Tuple
 import requests
+from typing import Dict
 from datetime import datetime
+
+from .config import (
+    MONOBANK_CLIENT_INFO_URI,
+    MONOBANK_CURRENCY_URI,
+    MONOBANK_STATEMENT_URI,
+    MONOBANK_WEBHOOK_URI,
+)
 
 
 class MonoManager:
+    def __init__(self, token=None):
+        self._token = token
 
-    def __init__(self, request):
-        self.request = request
-    
-    session = requests.Session()
-    
-    _currency_uri = 'https://api.monobank.ua/bank/currency'
-    _client_info_uri = 'https://api.monobank.ua/personal/client-info'
-    _statement_uri = 'https://api.monobank.ua/personal/statement/0/'
-    _webhook_uri = 'https://api.monobank.ua/personal/webhook'
-    _day_utc = 86400   # 1 day (UNIX)
+    _mono_currency_uri = MONOBANK_CURRENCY_URI
+    _mono_client_info_uri = MONOBANK_CLIENT_INFO_URI
+    _mono_statement_uri = MONOBANK_STATEMENT_URI
+    _mono_webhook_uri = MONOBANK_WEBHOOK_URI
+
+    @property
+    def token(self) -> str:
+        return self._token
+
+    @token.setter
+    def token(self, new_token):
+        self._token = new_token
+
+    @property
+    def mono_currency_uri(self) -> str:
+        return self._mono_currency_uri
+
+    @mono_currency_uri.setter
+    def mono_currency_uri(self, new_uri):
+        self._mono_currency_uri = new_uri
+
+    @property
+    def mono_client_info_uri(self) -> str:
+        return self._mono_client_info_uri
+
+    @mono_client_info_uri.setter
+    def mono_client_info_uri(self, new_uri):
+        self._mono_client_info_uri = new_uri
+
+    @property
+    def mono_statement_uri(self) -> str:
+        return self._mono_statement_uri
+
+    @mono_statement_uri.setter
+    def mono_statement_uri(self, new_uri):
+        self._mono_statement_uri = new_uri
+
+    @property
+    def mono_webhook_uri(self) -> str:
+        return self._mono_webhook_uri
+
+    @mono_webhook_uri.setter
+    def mono_webhook_uri(self, new_uri):
+        self._mono_webhook_uri = new_uri
 
     @classmethod
-    def get_currency(cls) -> Tuple[int, Dict[str, Any]]:
-        try:
-            response = cls.session.get(cls._currency_uri)
-            response.raise_for_status()
-            return response.status_code, response.json()
-        except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "detail": str(exc),
-                "code": response.status_code,
-            }
-            return error_response
-        except Exception as exc:
-            return {
-                "detail": str(exc)
-            }
+    def session(cls) -> requests.sessions.Session:
+        return requests.Session()
 
-    def get_client_info(self, token: str) -> Tuple[int, Dict[str, Any]]:
+    @staticmethod
+    def __date(period: int) -> Dict:
+        _day = 86400  # 1 day (UNIX)
         try:
-            headers = {"X-Token": token}
-            response = self.session.get(
-                self._client_info_uri,
-                headers=headers
-            )
-            response.raise_for_status()
-            return response.status_code, response.json()
-        except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "detail": str(exc),
-                "code": response.status_code,
-            }
-            return error_response
+            delta = int(datetime.now().timestamp()) - (period * _day)
+            time_delta = {"time_delta": delta}
+            return time_delta
         except Exception as exc:
-            return {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
+            return exception
 
-    def get_balance(self, token: str) -> Tuple[int, Dict[str, Any]]:
+    def get_currency(self) -> Dict:
         try:
-            headers = {"X-Token": token}
-            response = self.session.get(
-                self._client_info_uri,
-                headers=headers
-            )
+            session = self.session()
+            uri = self.mono_currency_uri
+            response = session.get(uri)
+            code = response.status_code
             response.raise_for_status()
-            balance = {
-                'balance': response.json()["accounts"][0]["balance"] / 100
-            }
-            return response.status_code, balance
+            payload = {"code": code, "detail": response.json()}
+            return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "detail": str(exc),
-                "code": response.status_code,
-            }
+            error_response = {"code": code, "detail": str(exc)}
             return error_response
         except Exception as exc:
-            return {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
+            return exception
 
-    def get_statement(self, token: str, period: int) -> Tuple[int, Dict[str, Any]]:
+    def get_client_info(self) -> Dict:
         try:
-            time_delta = int(datetime.now().timestamp()) - (period * self._day_utc)
+            session = self.session()
+            token = self.token
+            uri = self.mono_client_info_uri
             headers = {"X-Token": token}
-            response = self.session.get(
-                f"{self._statement_uri}{time_delta}/",
-                headers=headers
-            )
+            response = session.get(uri, headers=headers)
+            code = response.status_code
             response.raise_for_status()
-            return response.status_code, response.json()
+            payload = {"code": code, "detail": response.json()}
+            return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "detail": str(exc),
-                "code": response.status_code,
-            }
+            error_response = {"code": code, "detail": str(exc)}
             return error_response
         except Exception as exc:
-            return {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
+            return exception
 
-    def create_webhook(self, token: str, webHookUrl: str) -> Tuple[int, Dict[str, Any]]:
+    def get_balance(self) -> Dict:
         try:
+            client_info = self.get_client_info()
+            code = client_info.get("code")
+            data = client_info.get("detail")
+            balance = {"balance": data["accounts"][0]["balance"] / 100}
+            payload = {"code": code, "detail": balance}
+            return payload
+        except Exception:
+            return client_info
+
+    def get_statement(self, period: int) -> Dict:
+        try:
+            session = self.session()
+            token = self.token
+            uri = self.mono_statement_uri
             headers = {"X-Token": token}
-            response = self.session.post(
-                self._webhook_uri,
-                data=webHookUrl,
-                headers=headers
-            )
+            time_delta = self.__date(period).get("time_delta")
+            response = session.get(f"{uri}{time_delta}/", headers=headers)
+            code = response.status_code
             response.raise_for_status()
-            return response.status_code, response.json()
+            payload = {"code": code, "detail": response.json()}
+            return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {
-                "detail": str(exc),
-                "code": response.status_code,
-            }
+            error_response = {"code": code, "detail": str(exc)}
             return error_response
         except Exception as exc:
-            return {
-                "detail": str(exc)
-            }
+            exception = {"detail": str(exc)}
+            return exception
+
+    def create_webhook(self, webhook: str) -> Dict:
+        try:
+            session = self.session()
+            token = self.token
+            uri = self.mono_webhook_uri
+            headers = {"X-Token": token}
+            response = session.post(uri, headers=headers, data=webhook)
+            code = response.status_code
+            response.raise_for_status()
+            payload = {"code": code, "detail": response.json()}
+            return payload
+        except requests.exceptions.HTTPError as exc:
+            error_response = {"code": code, "detail": str(exc)}
+            return error_response
+        except Exception as exc:
+            exception = {"detail": str(exc)}
+            return exception
