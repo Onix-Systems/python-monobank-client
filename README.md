@@ -24,7 +24,7 @@ This framework is published at the TestPyPI, install it with pip:
 
 Get currencies
 ```python
->>> mng.get_currency()
+>>> mng.get_currencies()
 {
   "code": 200,
   "detail":
@@ -52,6 +52,20 @@ Get currencies
       },
       ...
     ]
+}
+```
+
+Get currency
+```python
+>>> mng.get_currency('USDUAH')
+{
+  "code": 200,
+  "detail": {
+    "USDUAH": {
+      "Buy": 37.5,
+      "Sale": 37.8702
+    }
+  }
 }
 ```
 

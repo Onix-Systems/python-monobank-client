@@ -7,6 +7,7 @@ from .config import (
     MONOBANK_CURRENCY_URI,
     MONOBANK_STATEMENT_URI,
     MONOBANK_WEBHOOK_URI,
+    MONOBANK_CURRENCIES,
 )
 
 
@@ -18,6 +19,7 @@ class MonoManager:
     _mono_client_info_uri = MONOBANK_CLIENT_INFO_URI
     _mono_statement_uri = MONOBANK_STATEMENT_URI
     _mono_webhook_uri = MONOBANK_WEBHOOK_URI
+    _mono_currencies = MONOBANK_CURRENCIES
 
     @property
     def token(self) -> str:
@@ -59,6 +61,10 @@ class MonoManager:
     def mono_webhook_uri(self, new_uri):
         self._mono_webhook_uri = new_uri
 
+    @property
+    def mono_currencies(self) -> Dict:
+        return self._mono_currencies
+
     @classmethod
     def session(cls) -> requests.sessions.Session:
         return requests.Session()
@@ -74,7 +80,7 @@ class MonoManager:
             exception = {"detail": str(exc)}
             return exception
 
-    def get_currency(self) -> Dict:
+    def get_currencies(self) -> Dict:
         try:
             session = self.session()
             uri = self.mono_currency_uri
@@ -85,6 +91,42 @@ class MonoManager:
             return payload
         except requests.exceptions.HTTPError as exc:
             error_response = {"code": code, "detail": str(exc)}
+            return error_response
+        except Exception as exc:
+            exception = {"detail": str(exc)}
+            return exception
+
+    def get_currency(self, ccy_pair: str) -> Dict:
+        try:
+            pair = self.mono_currencies.get(ccy_pair)
+            currencies = self.get_currencies()
+            code = currencies.get("code")
+            payload = currencies.get("detail")
+            if isinstance(payload, list):
+                for ccy in payload:
+                    if ccy.get("currencyCodeB") == pair.get("currencyCodeB"):
+                        for key, value in ccy.items():
+                            if key == "currencyCodeA" and value == pair.get(
+                                "currencyCodeA"
+                            ):
+                                buy = ccy.get("rateBuy")
+                                sale = ccy.get("rateSell")
+                                if buy is not None and sale is not None:
+                                    currency = {ccy_pair: {"Buy": buy, "Sale": sale}}
+                                else:
+                                    cross = ccy.get("rateCross")
+                                    currency = {ccy_pair: {"Cross": cross}}
+                                response = {"code": code, "detail": currency}
+                                return response
+            else:
+                response = {"code": code, "detail": payload}
+                return response
+        except AttributeError:
+            error_response = {
+                "code": 400,
+                "detail": "Please enter a valid query",
+                "list of acceptable currency pairs": self.mono_currencies.keys(),
+            }
             return error_response
         except Exception as exc:
             exception = {"detail": str(exc)}
