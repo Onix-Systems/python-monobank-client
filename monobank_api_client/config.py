@@ -17,6 +17,9 @@ MONOBANK_WEBHOOK_URI = os.getenv(
     "MONOBANK_WEBHOOK_URI", "https://api.monobank.ua/personal/webhook"
 )
 
+MONOBANK_CURRENCY_CODE_A = "currencyCodeA"
+MONOBANK_CURRENCY_CODE_B = "currencyCodeB"
+
 MONOBANK_CURRENCIES = {
     "USDUAH": {"currencyCodeA": 840, "currencyCodeB": 980},
     "EURUAH": {"currencyCodeA": 978, "currencyCodeB": 980},
