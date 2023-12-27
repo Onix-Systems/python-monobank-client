@@ -4,8 +4,8 @@ import os
 load_dotenv()
 
 
-MONOBANK_CURRENCY_URI = os.getenv(
-    "MONOBANK_CURRENCY_URI", "https://api.monobank.ua/bank/currency"
+MONOBANK_CURRENCIES_URI = os.getenv(
+    "MONOBANK_CURRENCIES_URI", "https://api.monobank.ua/bank/currency"
 )
 MONOBANK_CLIENT_INFO_URI = os.getenv(
     "MONOBANK_CLIENT_INFO_URI", "https://api.monobank.ua/personal/client-info"
