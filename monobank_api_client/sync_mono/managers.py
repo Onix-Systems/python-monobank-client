@@ -2,7 +2,7 @@ import requests
 from typing import Dict
 from datetime import datetime
 
-from .config import (
+from mono_config.config import (
     MONOBANK_CURRENCIES_URI,
     MONOBANK_CURRENCIES,
     MONOBANK_CURRENCY_CODE_A,
@@ -107,7 +107,7 @@ class MonoManager:
     def get_currencies(self) -> Dict:
         try:
             session = self.session()
-            uri = self.mono_currency_uri
+            uri = self.mono_currencies_uri
             response = session.get(uri)
             code = response.status_code
             response.raise_for_status()
@@ -146,10 +146,11 @@ class MonoManager:
                 response = {"code": code, "detail": payload}
                 return response
         except AttributeError:
+            list_ccy = self.mono_currencies.keys()
             error_response = {
                 "code": 400,
                 "detail": "Incorrect currency pair",
-                "list of acceptable currency pairs": self.mono_currencies.keys(),
+                "list of acceptable currency pairs": list_ccy,
             }
             return error_response
         except Exception as exc:

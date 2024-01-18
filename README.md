@@ -1,5 +1,5 @@
 # monobank-api-client
-This module is designed for quick interaction with the monobank API
+This module provides quick integration of the Monobank API for developing applications based on synchronous and asynchronous frameworks.
 
 ## Name
 monobank_api_client
@@ -7,7 +7,35 @@ monobank_api_client
 ## Installation
 This framework is published at the PyPI, install it with pip:
 
-    pip install monobank-api-client
+  1.This package makes it possible to use module methods in synchronous frameworks:
+
+    pip install monobank-api-client[http]
+
+  2.This package makes it possible to use module methods in asynchronous frameworks:
+
+    pip install monobank-api-client[aio]
+
+  3.This package makes it possible to use ready-made views with a synchronous script based on the Django Rest framework:
+
+    pip install monobank-api-client[drf]
+
+  To get started, add the following packages to INSTALLED_APPS:
+
+    INSTALLED_APPS = [
+        ...
+        'rest_framework',
+        'drf_mono',
+    ]
+
+  Include drf_mono urls to your urls.py:
+
+      urlpatterns = [
+          ...
+          path('mono/', include('drf_mono.urls', namespace='drf_mono')),
+      ]
+  4.To install all packages at once:
+
+    pip install monobank-api-client[all]
 
 ## Usage
 
