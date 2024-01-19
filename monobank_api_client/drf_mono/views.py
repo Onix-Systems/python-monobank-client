@@ -15,9 +15,9 @@ from .exceptions import (
     MonoTokenDoesNotExistsException,
 )
 
-from sync_mono.managers import MonoManager
+from sync_mono.manager import SyncMonoManager
 
-mng = MonoManager()
+mng = SyncMonoManager()
 
 
 class MonoView(GenericAPIView):
