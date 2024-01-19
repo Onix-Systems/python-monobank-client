@@ -9,11 +9,15 @@ class SyncMonoManager(BaseMonoManager, MonoException):
     def session(cls) -> requests.sessions.Session:
         return requests.Session()
 
-    def get_currencies(self) -> Dict:
+    def sync_request(
+        self, uri: str, headers: Dict | None, data: Dict | None, method: str
+    ) -> Dict:
+        session = self.session()
+        if method == "GET":
+            response = session.get(uri, headers=headers)
+        if method == "POST":
+            response = session.post(uri, headers=headers, data=data)
         try:
-            session = self.session()
-            uri = self.mono_currencies_uri
-            response = session.get(uri)
             code = response.status_code
             response.raise_for_status()
             payload = {"code": code, "detail": response.json()}
@@ -21,6 +25,15 @@ class SyncMonoManager(BaseMonoManager, MonoException):
         except requests.exceptions.HTTPError as exc:
             error_response = {"code": code, "detail": str(exc)}
             return error_response
+        except Exception as exc:
+            exception = {"detail": str(exc)}
+            return exception
+
+    def get_currencies(self) -> Dict:
+        try:
+            uri = self.mono_currencies_uri
+            response = self.sync_request(uri=uri, headers=None, data=None, method="GET")
+            return response
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception
@@ -41,18 +54,13 @@ class SyncMonoManager(BaseMonoManager, MonoException):
 
     def get_client_info(self) -> Dict:
         try:
-            session = self.session()
             token = self.token
             uri = self.mono_client_info_uri
             headers = {"X-Token": token}
-            response = session.get(uri, headers=headers)
-            code = response.status_code
-            response.raise_for_status()
-            payload = {"code": code, "detail": response.json()}
-            return payload
-        except requests.exceptions.HTTPError as exc:
-            error_response = {"code": code, "detail": str(exc)}
-            return error_response
+            response = self.sync_request(
+                uri=uri, headers=headers, data=None, method="GET"
+            )
+            return response
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception
@@ -70,37 +78,27 @@ class SyncMonoManager(BaseMonoManager, MonoException):
 
     def get_statement(self, period: int) -> Dict:
         try:
-            session = self.session()
             token = self.token
             uri = self.mono_statement_uri
             headers = {"X-Token": token}
             time_delta = self.date(period).get("time_delta")
-            response = session.get(f"{uri}{time_delta}/", headers=headers)
-            code = response.status_code
-            response.raise_for_status()
-            payload = {"code": code, "detail": response.json()}
-            return payload
-        except requests.exceptions.HTTPError as exc:
-            error_response = {"code": code, "detail": str(exc)}
-            return error_response
+            response = self.sync_request(
+                uri=f"{uri}{time_delta}/", headers=headers, data=None, method="GET"
+            )
+            return response
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception
 
     def create_webhook(self, webhook: str) -> Dict:
         try:
-            session = self.session()
             token = self.token
             uri = self.mono_webhook_uri
             headers = {"X-Token": token}
-            response = session.post(uri, headers=headers, data=webhook)
-            code = response.status_code
-            response.raise_for_status()
-            payload = {"code": code, "detail": response.json()}
-            return payload
-        except requests.exceptions.HTTPError as exc:
-            error_response = {"code": code, "detail": str(exc)}
-            return error_response
+            response = self.sync_request(
+                uri=uri, headers=headers, data=webhook, method="POST"
+            )
+            return response
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception

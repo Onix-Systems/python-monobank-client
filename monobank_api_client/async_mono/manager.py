@@ -9,24 +9,37 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
     async def session(cls) -> aiohttp.client.ClientSession:
         return aiohttp.ClientSession()
 
+    async def async_request(
+        self, uri: str, headers: Dict | None, data: Dict | None, method: str
+    ) -> Dict:
+        session = await self.session()
+        if method == "GET":
+            response = await session.get(uri, headers=headers)
+        if method == "POST":
+            response = await session.post(uri, headers=headers, data=data)
+        try:
+            code = response.status
+            response.raise_for_status()
+            detail = await response.json()
+            payload = {"code": code, "detail": detail}
+            return payload
+        except aiohttp.ClientResponseError as exc:
+            error_response = {"code": code, "detail": str(exc.message)}
+            return error_response
+        except Exception as exc:
+            exception = {"detail": str(exc)}
+            return exception
+
     async def get_currencies(self) -> Dict:
         try:
-            session = await self.session()
-            async with session:
-                uri = self.mono_currencies_uri
-                async with session.get(uri) as response:
-                    try:
-                        code = response.status
-                        response.raise_for_status()
-                        detail = await response.json()
-                        payload = {"code": code, "detail": detail}
-                        return payload
-                    except aiohttp.ClientResponseError as exc:
-                        error_response = {"code": code, "detail": str(exc.message)}
-                        return error_response
+            uri = self.mono_currencies_uri
+            response = await self.async_request(
+                uri=uri, headers=None, data=None, method="GET"
+            )
+            return response
         except Exception as exc:
-            error = {"datail": str(exc)}
-            return error
+            exception = {"datail": str(exc)}
+            return exception
 
     async def get_currency(self, ccy_pair: str) -> Dict:
         try:
@@ -44,24 +57,16 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
 
     async def get_client_info(self) -> Dict:
         try:
-            session = await self.session()
-            async with session:
-                uri = self.mono_client_info_uri
-                token = self.token
-                headers = {"X-Token": token}
-                async with session.get(uri, headers=headers) as response:
-                    try:
-                        code = response.status
-                        response.raise_for_status()
-                        detail = await response.json()
-                        payload = {"code": code, "detail": detail}
-                        return payload
-                    except aiohttp.ClientResponseError as exc:
-                        error_response = {"code": code, "detail": str(exc.message)}
-                        return error_response
+            uri = self.mono_client_info_uri
+            token = self.token
+            headers = {"X-Token": token}
+            response = await self.async_request(
+                uri=uri, headers=headers, data=None, method="GET"
+            )
+            return response
         except Exception as exc:
-            error = {"detail": str(exc)}
-            return error
+            exception = {"detail": str(exc)}
+            return exception
 
     async def get_balance(self) -> Dict:
         try:
@@ -76,45 +81,27 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
 
     async def get_statement(self, period: int) -> Dict:
         try:
-            session = await self.session()
-            async with session:
-                token = self.token
-                uri = self.mono_statement_uri
-                headers = {"X-Token": token}
-                time_delta = self.date(period).get("time_delta")
-                async with session.get(
-                    f"{uri}{time_delta}/", headers=headers
-                ) as response:
-                    try:
-                        code = response.status
-                        response.raise_for_status()
-                        detail = await response.json()
-                        payload = {"code": code, "detail": detail}
-                        return payload
-                    except aiohttp.ClientResponseError as exc:
-                        error_response = {"code": code, "detail": str(exc.message)}
-                        return error_response
+            uri = self.mono_statement_uri
+            token = self.token
+            headers = {"X-Token": token}
+            time_delta = self.date(period).get("time_delta")
+            response = await self.async_request(
+                uri=f"{uri}{time_delta}/", headers=headers, data=None, method="GET"
+            )
+            return response
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception
 
     async def create_webhook(self, webhook: str) -> Dict:
         try:
-            session = await self.session()
-            async with session:
-                token = self.token
-                uri = self.mono_webhook_uri
-                headers = {"X-Token": token}
-                async with session.post(uri, headers=headers, data=webhook) as response:
-                    try:
-                        code = response.status
-                        response.raise_for_status()
-                        detail = await response.json()
-                        payload = {"code": code, "detail": detail}
-                        return payload
-                    except aiohttp.ClientResponseError as exc:
-                        error_response = {"code": code, "detail": str(exc.message)}
-                        return error_response
+            uri = self.mono_webhook_uri
+            token = self.token
+            headers = {"X-Token": token}
+            response = await self.async_request(
+                uri=uri, headers=headers, data=webhook, method="POST"
+            )
+            return response
         except Exception as exc:
-            error = {"detail": str(exc)}
-            return error
+            exception = {"detail": str(exc)}
+            return exception
