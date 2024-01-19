@@ -12,4 +12,5 @@ class MonoException:
             }
             return error_response
         except Exception as exc:
-            error_response = {"detail": str(exc)}
+            exception = {"detail": str(exc)}
+            return exception
