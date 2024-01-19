@@ -1,9 +1,10 @@
 import requests
 from typing import Dict
 from mono_config.manager import BaseMonoManager
+from mono_config.exceptions import MonoException
 
 
-class SyncMonoManager(BaseMonoManager):
+class SyncMonoManager(BaseMonoManager, MonoException):
     @classmethod
     def session(cls) -> requests.sessions.Session:
         return requests.Session()
@@ -27,35 +28,30 @@ class SyncMonoManager(BaseMonoManager):
     def get_currency(self, ccy_pair: str) -> Dict:
         try:
             pair = self.mono_currencies.get(ccy_pair)
-            currencies = self.get_currencies()
-            code = currencies.get("code")
-            payload = currencies.get("detail")
-            if isinstance(payload, list):
-                codeA = self.mono_currency_code_a
-                codeB = self.mono_currency_code_b
-                for ccy in payload:
-                    if ccy.get(codeB) == pair.get(codeB):
-                        for key, value in ccy.items():
-                            if key == codeA and value == pair.get(codeA):
+            if pair is not None:
+                currencies = self.get_currencies()
+                code = currencies.get("code")
+                payload = currencies.get("detail")
+                if isinstance(payload, list):
+                    code_a = self.mono_currency_code_a
+                    code_b = self.mono_currency_code_b
+                    for ccy in payload:
+                        if ccy.get(code_a) == pair.get(code_a) and ccy.get(
+                            code_b
+                        ) == pair.get(code_b):
+                            cross = ccy.get("rateCross")
+                            if cross is not None:
+                                currency = {ccy_pair: {"Cross": cross}}
+                            else:
                                 buy = ccy.get("rateBuy")
                                 sale = ccy.get("rateSell")
-                                if buy is not None and sale is not None:
-                                    currency = {ccy_pair: {"Buy": buy, "Sale": sale}}
-                                else:
-                                    cross = ccy.get("rateCross")
-                                    currency = {ccy_pair: {"Cross": cross}}
-                                response = {"code": code, "detail": currency}
-                                return response
-            else:
-                response = {"code": code, "detail": payload}
+                                currency = {ccy_pair: {"Buy": buy, "Sale": sale}}
+                            response = {"code": code, "detail": currency}
+                else:
+                    response = {"code": code, "detail": payload}
                 return response
-        except AttributeError:
-            list_ccy = self.mono_currencies.keys()
-            error_response = {
-                "code": 400,
-                "detail": "Incorrect currency pair",
-                "list of acceptable currency pairs": list_ccy,
-            }
+            list_ccy = [key for key in self.mono_currencies.keys()]
+            error_response = self.currency_error(list_ccy)
             return error_response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -96,7 +92,7 @@ class SyncMonoManager(BaseMonoManager):
             token = self.token
             uri = self.mono_statement_uri
             headers = {"X-Token": token}
-            time_delta = self.__date(period).get("time_delta")
+            time_delta = self.date(period).get("time_delta")
             response = session.get(f"{uri}{time_delta}/", headers=headers)
             code = response.status_code
             response.raise_for_status()

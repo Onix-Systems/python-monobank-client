@@ -1,9 +1,10 @@
-from typing import Dict
 import aiohttp
+from typing import Dict
 from mono_config.manager import BaseMonoManager
+from mono_config.exceptions import MonoException
 
 
-class AsyncMonoManager(BaseMonoManager):
+class AsyncMonoManager(BaseMonoManager, MonoException):
     @classmethod
     async def session(cls) -> aiohttp.client.ClientSession:
         return aiohttp.ClientSession()
@@ -38,29 +39,22 @@ class AsyncMonoManager(BaseMonoManager):
                     code_a = self.mono_currency_code_a
                     code_b = self.mono_currency_code_b
                     for ccy in payload:
-                        if ccy.get(code_b) == pair.get(code_b):
-                            for key, value in ccy.items():
-                                if key == code_a and value == pair.get(code_a):
-                                    buy = ccy.get("rateBuy")
-                                    sale = ccy.get("rateSell")
-                                    if buy is not None and sale is not None:
-                                        currency = {
-                                            ccy_pair: {"Buy": buy, "Sale": sale}
-                                        }
-                                    else:
-                                        cross = ccy.get("rateCross")
-                                        currency = {ccy_pair: {"Cross": cross}}
-                                    response = {"code": code, "detail": currency}
-                                    return response
+                        if ccy.get(code_a) == pair.get(code_a) and ccy.get(
+                            code_b
+                        ) == pair.get(code_b):
+                            cross = ccy.get("rateCross")
+                            if cross is not None:
+                                currency = {ccy_pair: {"Cross": cross}}
+                            else:
+                                buy = ccy.get("rateBuy")
+                                sale = ccy.get("rateSell")
+                                currency = {ccy_pair: {"Buy": buy, "Sale": sale}}
+                            response = {"code": code, "detail": currency}
                 else:
                     response = {"code": code, "detail": payload}
-                    return response
+                return response
             list_ccy = [key for key in self.mono_currencies.keys()]
-            error_response = {
-                "code": 400,
-                "detail": "Incorrect currency pair",
-                "list of acceptable currency pairs": list_ccy,
-            }
+            error_response = self.currency_error(list_ccy)
             return error_response
         except Exception as exc:
             error = {"detail": str(exc)}
@@ -99,19 +93,13 @@ class AsyncMonoManager(BaseMonoManager):
             return info
 
     async def get_statement(self, period: int) -> Dict:
-        if period > 31:
-            error = {
-                "code": 400,
-                "detail": "The period should not be more than 31 days",
-            }
-            return error
         try:
             session = await self.session()
             async with session:
                 token = self.token
                 uri = self.mono_statement_uri
                 headers = {"X-Token": token}
-                time_delta = self.__date(period).get("time_delta")
+                time_delta = self.date(period).get("time_delta")
                 async with session.get(
                     f"{uri}{time_delta}/", headers=headers
                 ) as response:

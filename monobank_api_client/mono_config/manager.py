@@ -89,7 +89,7 @@ class BaseMonoManager:
         self._mono_webhook_uri = new_uri
 
     @staticmethod
-    def __date(period: int) -> Dict:
+    def date(period: int) -> Dict:
         _day = 86400  # 1 day (UNIX)
         try:
             delta = int(datetime.now().timestamp()) - (period * _day)
