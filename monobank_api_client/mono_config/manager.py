@@ -98,3 +98,29 @@ class BaseMonoManager:
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception
+
+    def currency(self, ccy_pair: str, pair: Dict, currencies: Dict) -> Dict:
+        try:
+            code_a = self.mono_currency_code_a
+            code_b = self.mono_currency_code_b
+            code = currencies.get("code")
+            payload = currencies.get("detail")
+            for ccy in payload:
+                if ccy.get(code_a) == pair.get(code_a) and ccy.get(code_b) == pair.get(
+                    code_b
+                ):
+                    cross = ccy.get("rateCross")
+                    if cross is not None:
+                        currency = {ccy_pair: {"Cross": cross}}
+                    else:
+                        buy = ccy.get("rateBuy")
+                        sale = ccy.get("rateSell")
+                        currency = {ccy_pair: {"Buy": buy, "Sale": sale}}
+                    response = {"code": code, "detail": currency}
+            return response
+        except AttributeError:
+            error_response = {"code": code, "detail": payload}
+            return error_response
+        except Exception as exc:
+            exception = {"detail": str(exc)}
+            return exception

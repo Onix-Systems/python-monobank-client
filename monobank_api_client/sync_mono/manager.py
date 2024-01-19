@@ -30,29 +30,10 @@ class SyncMonoManager(BaseMonoManager, MonoException):
             pair = self.mono_currencies.get(ccy_pair)
             if pair is not None:
                 currencies = self.get_currencies()
-                code = currencies.get("code")
-                payload = currencies.get("detail")
-                isinstance(payload, list)
-                code_a = self.mono_currency_code_a
-                code_b = self.mono_currency_code_b
-                for ccy in payload:
-                    if ccy.get(code_a) == pair.get(code_a) and ccy.get(
-                        code_b
-                    ) == pair.get(code_b):
-                        cross = ccy.get("rateCross")
-                        if cross is not None:
-                            currency = {ccy_pair: {"Cross": cross}}
-                        else:
-                            buy = ccy.get("rateBuy")
-                            sale = ccy.get("rateSell")
-                            currency = {ccy_pair: {"Buy": buy, "Sale": sale}}
-                        response = {"code": code, "detail": currency}
+                response = self.currency(ccy_pair, pair, currencies)
                 return response
             list_ccy = [key for key in self.mono_currencies.keys()]
             error_response = self.currency_error(list_ccy)
-            return error_response
-        except AttributeError:
-            error_response = {"code": code, "detail": payload}
             return error_response
         except Exception as exc:
             exception = {"detail": str(exc)}
