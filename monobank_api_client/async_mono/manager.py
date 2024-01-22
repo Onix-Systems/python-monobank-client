@@ -47,10 +47,10 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
             if pair is not None:
                 currencies = await self.get_currencies()
                 response = self.currency(ccy_pair, pair, currencies)
-                return response
-            list_ccy = [key for key in self.mono_currencies.keys()]
-            error_response = self.currency_error(list_ccy)
-            return error_response
+            else:
+                list_ccy = [key for key in self.mono_currencies.keys()]
+                response = self.currency_error(list_ccy)
+            return response
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception
@@ -74,8 +74,8 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
             code = info.get("code")
             data = info.get("detail")
             balance = {"balance": data["accounts"][0]["balance"] / 100}
-            payload = {"code": code, "detail": balance}
-            return payload
+            response = {"code": code, "detail": balance}
+            return response
         except Exception:
             return info
 

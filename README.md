@@ -40,13 +40,21 @@ This framework is published at the PyPI, install it with pip:
 ## Usage
 
 1. Request your token at https://api.monobank.ua/
-2. Use that token to initialize client:
+2. For a synchronous request use that token to initialize client:
 
-    from monobank_api_client.managers import MonoManager
+    from sync_mono.manager import SyncMonoManager
 
     token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-    mng = MonoManager(token)
+    mng = SyncMonoManager(token)
+
+3. For an asynchronous request, use this token to initialize the client:
+
+    from async_mono.manager import AsyncMonoManager
+
+    token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+    mng = AsyncMonoManager(token)
 
 ### Methods
 

@@ -17,8 +17,6 @@ from .exceptions import (
 
 from sync_mono.manager import SyncMonoManager
 
-mng = SyncMonoManager()
-
 
 class MonoView(GenericAPIView):
     serializer_class = MonoTokenSerializer
@@ -55,6 +53,7 @@ class MonoView(GenericAPIView):
 
 class CurrenciesListView(APIView):
     def get(self, request):
+        mng = SyncMonoManager()
         response = mng.get_currencies()
         return Response(response)
 
@@ -67,6 +66,7 @@ class CurrencyView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         currency = serializer.validated_data
         ccy_pair = currency.get("currency")
+        mng = SyncMonoManager()
         response = mng.get_currency(ccy_pair)
         return Response(response)
 
@@ -75,9 +75,9 @@ class ClientInfoView(APIView):
     def get(self, request):
         mono_obj = Mono.objects.filter(user=request.user).first()
         if mono_obj is not None:
-            mng.token = mono_obj.mono_token
-            payload = mng.get_client_info()
-            return Response(payload)
+            mng = SyncMonoManager(mono_obj.mono_token)
+            response = mng.get_client_info()
+            return Response(response)
         raise MonoTokenDoesNotExistsException
 
 
@@ -85,9 +85,9 @@ class BalanceView(APIView):
     def get(self, request):
         mono_obj = Mono.objects.filter(user=request.user).first()
         if mono_obj is not None:
-            mng.token = mono_obj.mono_token
-            payload = mng.get_balance()
-            return Response(payload)
+            mng = SyncMonoManager(mono_obj.mono_token)
+            response = mng.get_balance()
+            return Response(response)
         raise MonoTokenDoesNotExistsException
 
 
@@ -100,9 +100,9 @@ class StatementView(GenericAPIView):
         _ = serializer.validated_data
         mono_obj = Mono.objects.filter(user=request.user).first()
         if mono_obj is not None:
-            mng.token = mono_obj.mono_token
-            payload = mng.get_statement(_["period"])
-            return Response(payload)
+            mng = SyncMonoManager(mono_obj.mono_token)
+            response = mng.get_statement(_["period"])
+            return Response(response)
         raise MonoTokenDoesNotExistsException
 
 
@@ -115,7 +115,7 @@ class CreateWebhook(GenericAPIView):
         _ = serializer.validated_data
         mono_obj = Mono.objects.filter(user=request.user).first()
         if mono_obj is not None:
-            mng.token = mono_obj.mono_token
-            payload = mng.create_webhook(_["webHookUrl"])
-            return Response(payload)
+            mng = SyncMonoManager(mono_obj.mono_token)
+            response = mng.create_webhook(_["webHookUrl"])
+            return Response(response)
         raise MonoTokenDoesNotExistsException
