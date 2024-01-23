@@ -33,7 +33,12 @@ This framework is published at the PyPI, install it with pip:
           ...
           path('mono/', include('drf_mono.urls', namespace='drf_mono')),
       ]
-  4.To install all packages at once:
+  
+  4.This package makes it possible to use ready-made routers with an asynchronous script based on the FastAPI framework:
+
+    pip install monobank-api-client[fastapi]
+
+  5.To install all packages at once:
 
     pip install monobank-api-client[all]
 

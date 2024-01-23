@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name="monobank_api_client",
-    version="1.1.0",
+    version="1.1.2",
     author="ihor.sotnyk",
     author_email="ihor.sotnyk@onix-systems.com",
     description="This module is designed for quick interaction with the monobank API.",
@@ -22,17 +22,24 @@ setup(
         "async_mono": ["*.py"],
         "sync_mono": ["*.py"],
         "drf_mono": ["*.py"],
+        "fastapi_mono": ["*.py"],
     },
     install_requires=["python-dotenv==1.0.0"],
     extras_require={
         "http": ["requests>=2.25.1"],
         "aio": ["aiohttp==3.9.1"],
         "drf": ["Django>=4,<5", "djangorestframework", "requests>=2.25.1"],
+        "fastapi": ["fastapi[all]", "sqlalchemy", "psycopg2", "asyncpg"],
         "all": [
             "Django>=4,<5",
             "djangorestframework",
             "requests>=2.25.1",
+            "fastapi[all]",
             "aiohttp==3.9.1",
+            "sqlalchemy",
+            "psycopg2",
+            "asyncpg",
+            "alembic",
         ],
     },
     classifiers=[
