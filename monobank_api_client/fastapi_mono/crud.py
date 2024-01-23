@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict
 
 from fastapi import Response, status
 from sqlalchemy import insert, select, update, delete
@@ -28,11 +28,12 @@ async def create_mono(schema: MonoSchema, session: AsyncSession) -> Dict:
         return error
 
 
-async def read_mono(user: str, session: AsyncSession) -> Tuple:
+async def read_mono(user: str, session: AsyncSession) -> Dict:
     try:
         query = await session.execute(select(mdl).where(mdl.user_id == user))
         token = query.first()[0].mono_token
-        return token
+        response = {"token": token}
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception

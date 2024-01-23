@@ -1,3 +1,4 @@
+from typing import Dict
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +15,7 @@ router = APIRouter(tags=["Mono"])
 @router.post("/add-mono")
 async def add_monobank(
     schema: MonoSchema, session: AsyncSession = Depends(async_session)
-):
+) -> Dict:
     try:
         response = await crud.create_mono(schema, session)
         return response
@@ -28,7 +29,7 @@ async def change_monobank(
     user: str,
     schema: MonoSchemaUpdate,
     session: AsyncSession = Depends(async_session),
-):
+) -> Dict:
     try:
         response = await crud.update_mono(user, schema, session)
         return response
@@ -38,7 +39,9 @@ async def change_monobank(
 
 
 @router.delete("/delete-mono")
-async def delete_monobank(user: str, session: AsyncSession = Depends(async_session)):
+async def delete_monobank(
+    user: str, session: AsyncSession = Depends(async_session)
+) -> Dict:
     try:
         response = await crud.delete_mono(user, session)
         return response
@@ -48,31 +51,33 @@ async def delete_monobank(user: str, session: AsyncSession = Depends(async_sessi
 
 
 @router.get("/currencies")
-async def currencies():
+async def currencies() -> Dict:
     mng = AsyncMonoManager()
     response = await mng.get_currencies()
     return response
 
 
 @router.get("/currency")
-async def currency(ccy_pair: str):
+async def currency(ccy_pair: str) -> Dict:
     mng = AsyncMonoManager()
     response = await mng.get_currency(ccy_pair)
     return response
 
 
 @router.get("/client_info")
-async def client_info(user: str, session: AsyncSession = Depends(async_session)):
+async def client_info(
+    user: str, session: AsyncSession = Depends(async_session)
+) -> Dict:
     token = await crud.read_mono(user, session)
-    mng = AsyncMonoManager(token)
+    mng = AsyncMonoManager(token.get("token"))
     response = await mng.get_client_info()
     return response
 
 
 @router.get("/balance")
-async def balance(user: str, session: AsyncSession = Depends(async_session)):
+async def balance(user: str, session: AsyncSession = Depends(async_session)) -> Dict:
     token = await crud.read_mono(user, session)
-    mng = AsyncMonoManager(token)
+    mng = AsyncMonoManager(token.get("token"))
     response = await mng.get_balance()
     return response
 
@@ -80,9 +85,9 @@ async def balance(user: str, session: AsyncSession = Depends(async_session)):
 @router.get("/statement")
 async def statement(
     user: str, period: int, session: AsyncSession = Depends(async_session)
-):
+) -> Dict:
     token = await crud.read_mono(user, session)
-    mng = AsyncMonoManager(token)
+    mng = AsyncMonoManager(token.get("token"))
     response = await mng.get_statement(period)
     return response
 
@@ -90,8 +95,8 @@ async def statement(
 @router.post("/webhook")
 async def webhook(
     user: str, webhook: str, session: AsyncSession = Depends(async_session)
-):
+) -> Dict:
     token = await crud.read_mono(user, session)
-    mng = AsyncMonoManager(token)
+    mng = AsyncMonoManager(token.get("token"))
     response = await mng.create_webhook(webhook)
     return response
