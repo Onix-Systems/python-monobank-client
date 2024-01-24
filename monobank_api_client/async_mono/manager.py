@@ -1,16 +1,19 @@
 import aiohttp
 from typing import Dict
 from mono_config.manager import BaseMonoManager
-from mono_config.exceptions import MonoException
 
 
-class AsyncMonoManager(BaseMonoManager, MonoException):
+class AsyncMonoManager(BaseMonoManager):
     @classmethod
     async def session(cls) -> aiohttp.client.ClientSession:
         return aiohttp.ClientSession()
 
     async def async_request(
-        self, uri: str, headers: Dict | None, data: Dict | None, method: str
+        self,
+        method: str,
+        uri: str,
+        headers=None,
+        data=None,
     ) -> Dict:
         session = await self.session()
         if method == "GET":
@@ -33,9 +36,7 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
     async def get_currencies(self) -> Dict:
         try:
             uri = self.mono_currencies_uri
-            response = await self.async_request(
-                uri=uri, headers=None, data=None, method="GET"
-            )
+            response = await self.async_request(method="GET", uri=uri)
             return response
         except Exception as exc:
             exception = {"datail": str(exc)}
@@ -49,7 +50,7 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
                 response = self.currency(ccy_pair, pair, currencies)
             else:
                 list_ccy = [key for key in self.mono_currencies.keys()]
-                response = self.currency_error(list_ccy)
+                response = self.currency_exception(list_ccy)
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -60,9 +61,7 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
             uri = self.mono_client_info_uri
             token = self.token
             headers = {"X-Token": token}
-            response = await self.async_request(
-                uri=uri, headers=headers, data=None, method="GET"
-            )
+            response = await self.async_request(method="GET", uri=uri, headers=headers)
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -86,7 +85,7 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
             headers = {"X-Token": token}
             time_delta = self.date(period).get("time_delta")
             response = await self.async_request(
-                uri=f"{uri}{time_delta}/", headers=headers, data=None, method="GET"
+                method="GET", uri=f"{uri}{time_delta}/", headers=headers
             )
             return response
         except Exception as exc:
@@ -99,7 +98,10 @@ class AsyncMonoManager(BaseMonoManager, MonoException):
             token = self.token
             headers = {"X-Token": token}
             response = await self.async_request(
-                uri=uri, headers=headers, data=webhook, method="POST"
+                method="POST",
+                uri=uri,
+                headers=headers,
+                data=webhook,
             )
             return response
         except Exception as exc:

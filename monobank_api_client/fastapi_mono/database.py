@@ -1,9 +1,9 @@
+import os
+from dotenv import load_dotenv
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
-import os
-from dotenv import load_dotenv
 
 
 load_dotenv()

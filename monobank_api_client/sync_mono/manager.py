@@ -1,16 +1,19 @@
 import requests
 from typing import Dict
 from mono_config.manager import BaseMonoManager
-from mono_config.exceptions import MonoException
 
 
-class SyncMonoManager(BaseMonoManager, MonoException):
+class SyncMonoManager(BaseMonoManager):
     @classmethod
     def session(cls) -> requests.sessions.Session:
         return requests.Session()
 
     def sync_request(
-        self, uri: str, headers: Dict | None, data: Dict | None, method: str
+        self,
+        method: str,
+        uri: str,
+        headers=None,
+        data=None,
     ) -> Dict:
         session = self.session()
         if method == "GET":
@@ -32,7 +35,7 @@ class SyncMonoManager(BaseMonoManager, MonoException):
     def get_currencies(self) -> Dict:
         try:
             uri = self.mono_currencies_uri
-            response = self.sync_request(uri=uri, headers=None, data=None, method="GET")
+            response = self.sync_request(method="GET", uri=uri)
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -46,7 +49,7 @@ class SyncMonoManager(BaseMonoManager, MonoException):
                 response = self.currency(ccy_pair, pair, currencies)
             else:
                 list_ccy = [key for key in self.mono_currencies.keys()]
-                response = self.currency_error(list_ccy)
+                response = self.currency_exception(list_ccy)
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -57,9 +60,7 @@ class SyncMonoManager(BaseMonoManager, MonoException):
             token = self.token
             uri = self.mono_client_info_uri
             headers = {"X-Token": token}
-            response = self.sync_request(
-                uri=uri, headers=headers, data=None, method="GET"
-            )
+            response = self.sync_request(method="GET", uri=uri, headers=headers)
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -83,7 +84,7 @@ class SyncMonoManager(BaseMonoManager, MonoException):
             headers = {"X-Token": token}
             time_delta = self.date(period).get("time_delta")
             response = self.sync_request(
-                uri=f"{uri}{time_delta}/", headers=headers, data=None, method="GET"
+                method="GET", uri=f"{uri}{time_delta}/", headers=headers
             )
             return response
         except Exception as exc:
@@ -96,7 +97,7 @@ class SyncMonoManager(BaseMonoManager, MonoException):
             uri = self.mono_webhook_uri
             headers = {"X-Token": token}
             response = self.sync_request(
-                uri=uri, headers=headers, data=webhook, method="POST"
+                method="POST", uri=uri, headers=headers, data=webhook
             )
             return response
         except Exception as exc:
