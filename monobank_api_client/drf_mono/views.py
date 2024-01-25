@@ -17,29 +17,35 @@ class MonoView(GenericAPIView):
 
     def post(self, request) -> Dict:
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid()
         _ = serializer.validated_data
-        mono_obj = Mono.objects.filter(user=self.request.user)
-        mono_obj.create(mono_token=_["mono_token"], user=request.user)
+        mono = Mono.objects.filter(user=self.request.user)
         mng = SyncMonoManager()
-        response = mng.create_success()
+        if mono.first() is not None:
+            response = mng.exists_exception()
+        else:
+            mono.create(mono_token=_["mono_token"], user=request.user)
+            response = mng.create_success()
         return Response(response)
 
     def put(self, request) -> Dict:
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         _ = serializer.validated_data
-        mono_obj = Mono.objects.filter(user=request.user)
-        mono_obj.update(mono_token=_["mono_token"])
+        mono = Mono.objects.filter(user=request.user)
         mng = SyncMonoManager()
-        response = mng.update_success()
+        if mono.first() is not None:
+            mono.update(mono_token=_["mono_token"])
+            response = mng.update_success()
+        else:
+            response = mng.does_not_exsists_exception()
         return Response(response)
 
     def delete(self, request) -> Dict:
         mng = SyncMonoManager()
-        mono_obj = Mono.objects.filter(user=request.user)
-        if mono_obj.first() is not None:
-            mono_obj.delete()
+        mono = Mono.objects.filter(user=request.user)
+        if mono.first() is not None:
+            mono.delete()
             response = mng.delete_success()
         else:
             response = mng.does_not_exsists_exception()

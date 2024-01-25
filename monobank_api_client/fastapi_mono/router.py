@@ -72,35 +72,29 @@ async def currency(ccy_pair: str) -> Dict:
 
 @router.get("/client_info")
 async def client_info(
-    user: str, session: AsyncSession = Depends(async_session)
+    user_id: str, session: AsyncSession = Depends(async_session)
 ) -> Dict:
     try:
         mng = AsyncMonoManager()
-        mono = await crud.read_mono(user, session)
-        token = mono.get("token")
-        if token is not None:
-            mng.token = token
-            response = await mng.get_client_info()
-        else:
-            response = mng.does_not_exsists_exception()
-        return response
+        payload = await crud.read_mono(user_id, session)
+        if payload is not None:
+            mng.token = payload[0].mono_token
+            return await mng.get_client_info()
+        return mng.does_not_exsists_exception()
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
 
 
 @router.get("/balance")
-async def balance(user: str, session: AsyncSession = Depends(async_session)) -> Dict:
+async def balance(user_id: str, session: AsyncSession = Depends(async_session)) -> Dict:
     try:
         mng = AsyncMonoManager()
-        mono = await crud.read_mono(user, session)
-        token = mono.get("token")
-        if token is not None:
-            mng.token = token
-            response = await mng.get_balance()
-        else:
-            response = mng.does_not_exsists_exception()
-        return response
+        payload = await crud.read_mono(user_id, session)
+        if payload is not None:
+            mng.token = payload[0].mono_token
+            return await mng.get_balance()
+        return mng.does_not_exsists_exception()
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -108,18 +102,15 @@ async def balance(user: str, session: AsyncSession = Depends(async_session)) -> 
 
 @router.get("/statement")
 async def statement(
-    user: str, period: int, session: AsyncSession = Depends(async_session)
+    user_id: str, period: int, session: AsyncSession = Depends(async_session)
 ) -> Dict:
     try:
         mng = AsyncMonoManager()
-        mono = await crud.read_mono(user, session)
-        token = mono.get("token")
-        if token is not None:
-            mng.token = token
-            response = await mng.get_statement(period)
-        else:
-            response = mng.does_not_exsists_exception()
-        return response
+        payload = await crud.read_mono(user_id, session)
+        if payload is not None:
+            mng.token = payload[0].mono_token
+            return await mng.get_statement(period)
+        return mng.does_not_exsists_exception()
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -127,13 +118,15 @@ async def statement(
 
 @router.post("/webhook")
 async def webhook(
-    user: str, webhook: str, session: AsyncSession = Depends(async_session)
+    user_id: str, webhook: str, session: AsyncSession = Depends(async_session)
 ) -> Dict:
     try:
-        mono = await crud.read_mono(user, session)
-        mng = AsyncMonoManager(mono.get("token"))
-        response = await mng.create_webhook(webhook)
-        return response
+        mng = AsyncMonoManager()
+        payload = await crud.read_mono(user_id, session)
+        if payload is not None:
+            mng.token = payload[0].mono_token
+            return await mng.create_webhook(webhook)
+        return mng.does_not_exsists_exception()
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception

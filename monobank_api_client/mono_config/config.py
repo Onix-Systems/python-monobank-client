@@ -131,13 +131,13 @@ MONOBANK_CURRENCIES = {
 }
 
 MONO_CREATE_SUCCESS_CODE = 201
-MONO_CREATE_SUCCESS_DETAIL = "Mono-token added successfully."
+MONO_CREATE_SUCCESS_DETAIL = "Mono added successfully."
 
 MONO_UPDATE_SUCCESS_CODE = 200
-MONO_UPDATE_SUCCESS_DETAIL = "Mono-token chanched successfully."
+MONO_UPDATE_SUCCESS_DETAIL = "Mono chanched successfully."
 
 MONO_DELETE_SUCCESS_CODE = 204
-MONO_DELETE_SUCCESS_DETAIL = "Mono-token deleted successfully."
+MONO_DELETE_SUCCESS_DETAIL = "Mono deleted successfully."
 
 MONO_CURRENCY_EXCEPTION_CODE = 400
 MONO_CURRENCY_EXCEPTION_DETAIL = "Incorrect currency pair."
