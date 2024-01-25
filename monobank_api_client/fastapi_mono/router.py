@@ -15,8 +15,7 @@ async def add_monobank(
     schema: MonoSchema, session: AsyncSession = Depends(async_session)
 ) -> Dict:
     try:
-        response = await crud.create_mono(schema, session)
-        return response
+        return await crud.create_mono(schema, session)
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -29,8 +28,7 @@ async def change_monobank(
     session: AsyncSession = Depends(async_session),
 ) -> Dict:
     try:
-        response = await crud.update_mono(user, schema, session)
-        return response
+        return await crud.update_mono(user, schema, session)
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -41,8 +39,7 @@ async def delete_monobank(
     user: str, session: AsyncSession = Depends(async_session)
 ) -> Dict:
     try:
-        response = await crud.delete_mono(user, session)
-        return response
+        return await crud.delete_mono(user, session)
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -52,8 +49,7 @@ async def delete_monobank(
 async def currencies() -> Dict:
     try:
         mng = AsyncMonoManager()
-        response = await mng.get_currencies()
-        return response
+        return await mng.get_currencies()
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -63,8 +59,7 @@ async def currencies() -> Dict:
 async def currency(ccy_pair: str) -> Dict:
     try:
         mng = AsyncMonoManager()
-        response = await mng.get_currency(ccy_pair)
-        return response
+        return await mng.get_currency(ccy_pair)
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
