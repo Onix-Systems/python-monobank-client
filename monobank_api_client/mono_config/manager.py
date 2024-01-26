@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, Any
 from datetime import datetime
 from .config import (
     MONOBANK_CURRENCIES_URI,
@@ -218,27 +218,38 @@ class BaseMonoManager:
             exception = {"detail": str(exc)}
             return exception
 
-    def currency(self, ccy_pair: str, pair: Dict, currencies: Dict) -> Dict:
+    def mono_response(self, code: int, detail: Any, info=None) -> Dict:
+        try:
+            if info is not None:
+                response = {"code": code, "detail": detail, "info": info}
+            else:
+                response = {"code": code, "detail": detail}
+            return response
+        except Exception as exc:
+            exception = {"detail": str(exc)}
+            return exception
+
+    def currency(self, ccy: str, pair: Dict, currencies: Dict) -> Dict:
         try:
             code_a = self.mono_currency_code_a
             code_b = self.mono_currency_code_b
             code = currencies.get("code")
             payload = currencies.get("detail")
-            for ccy in payload:
-                if ccy.get(code_a) == pair.get(code_a) and ccy.get(code_b) == pair.get(
+            for _ in payload:
+                if _.get(code_a) == pair.get(code_a) and _.get(code_b) == pair.get(
                     code_b
                 ):
-                    cross = ccy.get("rateCross")
+                    cross = _.get("rateCross")
                     if cross is not None:
-                        currency = {ccy_pair: {"Cross": cross}}
+                        currency = {ccy: {"Cross": cross}}
                     else:
-                        buy = ccy.get("rateBuy")
-                        sale = ccy.get("rateSell")
-                        currency = {ccy_pair: {"Buy": buy, "Sale": sale}}
-                    response = {"code": code, "detail": currency}
+                        buy = _.get("rateBuy")
+                        sale = _.get("rateSell")
+                        currency = {ccy: {"Buy": buy, "Sale": sale}}
+                    response = self.mono_response(code, currency)
             return response
         except AttributeError:
-            error_response = {"code": code, "detail": payload}
+            error_response = self.mono_response(code, payload)
             return error_response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -246,10 +257,9 @@ class BaseMonoManager:
 
     def create_success(self) -> Dict:
         try:
-            response = {
-                "code": self.mono_create_success_code,
-                "detail": self.mono_create_success_detail,
-            }
+            response = self.mono_response(
+                self.mono_create_success_code, self.mono_create_success_detail
+            )
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -257,10 +267,9 @@ class BaseMonoManager:
 
     def update_success(self) -> Dict:
         try:
-            response = {
-                "code": self.mono_update_success_code,
-                "detail": self.mono_update_success_detail,
-            }
+            response = self.mono_response(
+                self.mono_update_success_code, self.mono_update_success_detail
+            )
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -268,22 +277,23 @@ class BaseMonoManager:
 
     def delete_success(self) -> Dict:
         try:
-            response = {
-                "code": self.mono_delete_success_code,
-                "detail": self.mono_delete_success_detail,
-            }
+            response = self.mono_response(
+                self.mono_delete_success_code, self.mono_delete_success_detail
+            )
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
             return exception
 
-    def currency_exception(self, list_ccy: List) -> Dict:
+    def currency_exception(self) -> Dict:
         try:
-            response = {
-                "code": self.mono_currency_exception_code,
-                "detail": self.mono_currency_exception_detail,
-                "list of acceptable currency pairs": list_ccy,
-            }
+            list_ccy = [key for key in self.mono_currencies.keys()]
+            currencies_pairs = {"currencies pairs": list_ccy}
+            response = self.mono_response(
+                self.mono_currency_exception_code,
+                self.mono_currency_exception_detail,
+                currencies_pairs,
+            )
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -291,10 +301,9 @@ class BaseMonoManager:
 
     def exists_exception(self) -> Dict:
         try:
-            response = {
-                "code": self.mono_exsists_exception_code,
-                "detail": self.mono_exsists_exception_detail,
-            }
+            response = self.mono_response(
+                self.mono_exsists_exception_code, self.mono_exsists_exception_detail
+            )
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -302,10 +311,10 @@ class BaseMonoManager:
 
     def does_not_exsists_exception(self) -> Dict:
         try:
-            response = {
-                "code": self.mono_does_not_exsists_exception_code,
-                "detail": self.mono_does_not_exsists_exception_detail,
-            }
+            response = self.mono_response(
+                self.mono_does_not_exsists_exception_code,
+                self.mono_does_not_exsists_exception_detail,
+            )
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}

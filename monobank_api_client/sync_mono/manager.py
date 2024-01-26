@@ -23,10 +23,11 @@ class SyncMonoManager(BaseMonoManager):
         try:
             code = response.status_code
             response.raise_for_status()
-            payload = {"code": code, "detail": response.json()}
+            detail = response.json()
+            payload = self.mono_response(code, detail)
             return payload
         except requests.exceptions.HTTPError as exc:
-            error_response = {"code": code, "detail": str(exc)}
+            error_response = self.mono_response(code, str(exc))
             return error_response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -41,15 +42,14 @@ class SyncMonoManager(BaseMonoManager):
             exception = {"detail": str(exc)}
             return exception
 
-    def get_currency(self, ccy_pair: str) -> Dict:
+    def get_currency(self, ccy: str) -> Dict:
         try:
-            pair = self.mono_currencies.get(ccy_pair)
+            pair = self.mono_currencies.get(ccy)
             if pair is not None:
                 currencies = self.get_currencies()
-                response = self.currency(ccy_pair, pair, currencies)
+                response = self.currency(ccy, pair, currencies)
             else:
-                list_ccy = [key for key in self.mono_currencies.keys()]
-                response = self.currency_exception(list_ccy)
+                response = self.currency_exception()
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -68,14 +68,14 @@ class SyncMonoManager(BaseMonoManager):
 
     def get_balance(self) -> Dict:
         try:
-            client_info = self.get_client_info()
-            code = client_info.get("code")
-            data = client_info.get("detail")
+            payload = self.get_client_info()
+            code = payload.get("code")
+            data = payload.get("detail")
             balance = {"balance": data["accounts"][0]["balance"] / 100}
-            response = {"code": code, "detail": balance}
+            response = self.mono_response(code, balance)
             return response
         except Exception:
-            return client_info
+            return payload
 
     def get_statement(self, period: int) -> Dict:
         try:

@@ -24,10 +24,10 @@ class AsyncMonoManager(BaseMonoManager):
             code = response.status
             response.raise_for_status()
             detail = await response.json()
-            payload = {"code": code, "detail": detail}
+            payload = self.mono_response(code, detail)
             return payload
         except aiohttp.ClientResponseError as exc:
-            error_response = {"code": code, "detail": str(exc.message)}
+            error_response = self.mono_response(code, str(exc.message))
             return error_response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -42,15 +42,14 @@ class AsyncMonoManager(BaseMonoManager):
             exception = {"datail": str(exc)}
             return exception
 
-    async def get_currency(self, ccy_pair: str) -> Dict:
+    async def get_currency(self, ccy: str) -> Dict:
         try:
-            pair = self.mono_currencies.get(ccy_pair)
+            pair = self.mono_currencies.get(ccy)
             if pair is not None:
                 currencies = await self.get_currencies()
-                response = self.currency(ccy_pair, pair, currencies)
+                response = self.currency(ccy, pair, currencies)
             else:
-                list_ccy = [key for key in self.mono_currencies.keys()]
-                response = self.currency_exception(list_ccy)
+                response = self.currency_exception()
             return response
         except Exception as exc:
             exception = {"detail": str(exc)}
@@ -69,14 +68,14 @@ class AsyncMonoManager(BaseMonoManager):
 
     async def get_balance(self) -> Dict:
         try:
-            info = await self.get_client_info()
-            code = info.get("code")
-            data = info.get("detail")
+            payload = await self.get_client_info()
+            code = payload.get("code")
+            data = payload.get("detail")
             balance = {"balance": data["accounts"][0]["balance"] / 100}
-            response = {"code": code, "detail": balance}
+            response = self.mono_response(code, balance)
             return response
         except Exception:
-            return info
+            return payload
 
     async def get_statement(self, period: int) -> Dict:
         try:

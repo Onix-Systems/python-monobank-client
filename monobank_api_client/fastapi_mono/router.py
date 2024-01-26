@@ -15,7 +15,8 @@ async def add_monobank(
     schema: MonoSchema, session: AsyncSession = Depends(async_session)
 ) -> Dict:
     try:
-        return await crud.create_mono(schema, session)
+        response = await crud.create_mono(schema, session)
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -28,7 +29,8 @@ async def change_monobank(
     session: AsyncSession = Depends(async_session),
 ) -> Dict:
     try:
-        return await crud.update_mono(user, schema, session)
+        response = await crud.update_mono(user, schema, session)
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -39,7 +41,8 @@ async def delete_monobank(
     user: str, session: AsyncSession = Depends(async_session)
 ) -> Dict:
     try:
-        return await crud.delete_mono(user, session)
+        response = await crud.delete_mono(user, session)
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -49,7 +52,8 @@ async def delete_monobank(
 async def currencies() -> Dict:
     try:
         mng = AsyncMonoManager()
-        return await mng.get_currencies()
+        response = await mng.get_currencies()
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -59,7 +63,8 @@ async def currencies() -> Dict:
 async def currency(ccy_pair: str) -> Dict:
     try:
         mng = AsyncMonoManager()
-        return await mng.get_currency(ccy_pair)
+        response = await mng.get_currency(ccy_pair)
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -74,8 +79,10 @@ async def client_info(
         payload = await crud.read_mono(user_id, session)
         if payload is not None:
             mng.token = payload[0].mono_token
-            return await mng.get_client_info()
-        return mng.does_not_exsists_exception()
+            response = await mng.get_client_info()
+        else:
+            response = mng.does_not_exsists_exception()
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -88,8 +95,10 @@ async def balance(user_id: str, session: AsyncSession = Depends(async_session)) 
         payload = await crud.read_mono(user_id, session)
         if payload is not None:
             mng.token = payload[0].mono_token
-            return await mng.get_balance()
-        return mng.does_not_exsists_exception()
+            response = await mng.get_balance()
+        else:
+            response = mng.does_not_exsists_exception()
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -104,8 +113,10 @@ async def statement(
         payload = await crud.read_mono(user_id, session)
         if payload is not None:
             mng.token = payload[0].mono_token
-            return await mng.get_statement(period)
-        return mng.does_not_exsists_exception()
+            response = await mng.get_statement(period)
+        else:
+            response = mng.does_not_exsists_exception()
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
@@ -120,8 +131,10 @@ async def webhook(
         payload = await crud.read_mono(user_id, session)
         if payload is not None:
             mng.token = payload[0].mono_token
-            return await mng.create_webhook(webhook)
-        return mng.does_not_exsists_exception()
+            response = await mng.create_webhook(webhook)
+        else:
+            response = mng.does_not_exsists_exception()
+        return response
     except Exception as exc:
         exception = {"detail": str(exc)}
         return exception
