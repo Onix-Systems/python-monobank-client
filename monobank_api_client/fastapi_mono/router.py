@@ -7,10 +7,10 @@ from fastapi_mono import crud
 from async_mono.manager import AsyncMonoManager
 
 
-router = APIRouter(tags=["Mono"])
+router = APIRouter(tags=["Mono"], prefix="/mono")
 
 
-@router.post("/add-mono")
+@router.post("/add")
 async def add_monobank(
     schema: MonoSchema, session: AsyncSession = Depends(async_session)
 ) -> Dict:
@@ -22,7 +22,7 @@ async def add_monobank(
         return exception
 
 
-@router.put("/change-mono")
+@router.put("/change")
 async def change_monobank(
     user: str,
     schema: MonoSchemaUpdate,
@@ -36,7 +36,7 @@ async def change_monobank(
         return exception
 
 
-@router.delete("/delete-mono")
+@router.delete("/delete")
 async def delete_monobank(
     user: str, session: AsyncSession = Depends(async_session)
 ) -> Dict:
