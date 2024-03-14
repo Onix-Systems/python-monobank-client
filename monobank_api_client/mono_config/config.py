@@ -129,3 +129,21 @@ MONOBANK_CURRENCIES = {
     "YERUAH": {"currencyCodeA": 886, "currencyCodeB": 980},
     "ZARUAH": {"currencyCodeA": 710, "currencyCodeB": 980},
 }
+
+MONO_CREATE_SUCCESS_CODE = 201
+MONO_CREATE_SUCCESS_DETAIL = "Mono added successfully."
+
+MONO_UPDATE_SUCCESS_CODE = 200
+MONO_UPDATE_SUCCESS_DETAIL = "Mono chanched successfully."
+
+MONO_DELETE_SUCCESS_CODE = 204
+MONO_DELETE_SUCCESS_DETAIL = "Mono deleted successfully."
+
+MONO_CURRENCY_EXCEPTION_CODE = 400
+MONO_CURRENCY_EXCEPTION_DETAIL = "Incorrect currency pair."
+
+MONO_EXISTS_EXCEPTION_CODE = 400
+MONO_EXISTS_EXCEPTION_DETAIL = "Your mono is already exists."
+
+MONO_DOES_NOT_EXISTS_EXCEPTION_CODE = 404
+MONO_DOES_NOT_EXISTS_EXCEPTION_DETAIL = "Your mono has not been added yet."

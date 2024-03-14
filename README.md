@@ -1,5 +1,5 @@
 # monobank-api-client
-This module is designed for quick interaction with the monobank API
+This module provides quick integration of the Monobank API for developing applications based on synchronous and asynchronous frameworks.
 
 ## Name
 monobank_api_client
@@ -7,18 +7,59 @@ monobank_api_client
 ## Installation
 This framework is published at the PyPI, install it with pip:
 
-    pip install monobank-api-client
+  1.This package makes it possible to use module methods in synchronous frameworks:
+
+    pip install monobank-api-client[http]
+
+  2.This package makes it possible to use module methods in asynchronous frameworks:
+
+    pip install monobank-api-client[aio]
+
+  3.This package makes it possible to use ready-made views with a synchronous script based on the Django Rest framework:
+
+    pip install monobank-api-client[drf]
+
+  To get started, add the following packages to INSTALLED_APPS:
+
+    INSTALLED_APPS = [
+        ...
+        'rest_framework',
+        'drf_mono',
+    ]
+
+  Include drf_mono urls to your urls.py:
+
+      urlpatterns = [
+          ...
+          path('mono/', include('drf_mono.urls', namespace='drf_mono')),
+      ]
+  
+  4.This package makes it possible to use ready-made routers with an asynchronous script based on the FastAPI framework:
+
+    pip install monobank-api-client[fastapi]
+
+  5.To install all packages at once:
+
+    pip install monobank-api-client[all]
 
 ## Usage
 
 1. Request your token at https://api.monobank.ua/
-2. Use that token to initialize client:
+2. For a synchronous request use that token to initialize client:
 
-    from monobank_api_client.managers import MonoManager
+    from sync_mono.manager import SyncMonoManager
 
     token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-    mng = MonoManager(token)
+    mng = SyncMonoManager(token)
+
+3. For an asynchronous request, use this token to initialize the client:
+
+    from async_mono.manager import AsyncMonoManager
+
+    token = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+    mng = AsyncMonoManager(token)
 
 ### Methods
 
