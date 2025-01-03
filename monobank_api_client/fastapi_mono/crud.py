@@ -1,9 +1,9 @@
 from typing import Dict
 from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi_mono.models import MonoModel as mdl
-from fastapi_mono.schemas import MonoSchema, MonoSchemaUpdate
-from async_mono.manager import AsyncMonoManager
+from monobank_api_client.fastapi_mono.models import MonoModel as mdl
+from monobank_api_client.fastapi_mono.schemas import MonoSchema, MonoSchemaUpdate
+from monobank_api_client.async_mono.manager import AsyncMonoManager
 
 
 async def create_mono(schema: MonoSchema, session: AsyncSession) -> Dict:

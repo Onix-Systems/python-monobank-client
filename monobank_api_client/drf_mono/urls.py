@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (
+from monobank_api_client.drf_mono.views import (
     MonoView,
     CurrenciesListView,
     CurrencyView,

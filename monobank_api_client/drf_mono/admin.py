@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Mono
+from monobank_api_client.drf_mono.models import Mono
 
 
 @admin.register(Mono)

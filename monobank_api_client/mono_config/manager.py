@@ -1,6 +1,6 @@
 from typing import Dict, Any
 from datetime import datetime
-from .config import (
+from monobank_api_client.mono_config.config import (
     MONOBANK_CURRENCIES_URI,
     MONOBANK_CURRENCIES,
     MONOBANK_CURRENCY_CODE_A,

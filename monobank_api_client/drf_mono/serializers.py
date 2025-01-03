@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Mono
+from monobank_api_client.drf_mono.models import Mono
 
 
 class MonoTokenSerializer(serializers.ModelSerializer):
