@@ -7,10 +7,10 @@ def readme():
 
 
 setup(
-    name="monobank_api_client",
-    version="1.2.3",
-    author="ihor.sotnyk",
-    author_email="ihor.sotnyk@onix-systems.com",
+    name="python-monobank-client",
+    version="0.0.1",
+    author="Viacheslav Lisovoi",
+    author_email="viacheslav.lisovoi@onix-systems.com",
     description="This module is designed for quick interaction with the monobank API.",
     long_description=readme(),
     long_description_content_type="text/markdown",
