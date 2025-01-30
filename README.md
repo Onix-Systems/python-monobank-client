@@ -4,7 +4,7 @@
 This module provides quick integration of the Monobank API for developing applications based on synchronous and asynchronous frameworks.
 
 ## Name
-monobank_api_client
+Python-Monobank-Client
 
 ## Installation
 This framework is published at the PyPI, install it with pip:
