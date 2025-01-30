@@ -1,4 +1,6 @@
-# monobank-api-client
+# python-monobank-client
+[![Documentation Status](https://readthedocs.org/projects/python-monobank-client/badge/?version=latest)](https://python-monobank-client.readthedocs.io/en/latest/?badge=latest)
+
 This module provides quick integration of the Monobank API for developing applications based on synchronous and asynchronous frameworks.
 
 ## Name
@@ -9,15 +11,15 @@ This framework is published at the PyPI, install it with pip:
 
   1.This package makes it possible to use module methods in synchronous frameworks:
 
-    pip install monobank-api-client[http]
+    pip install python-monobank-client[http]
 
   2.This package makes it possible to use module methods in asynchronous frameworks:
 
-    pip install monobank-api-client[aio]
+    pip install python-monobank-client[aio]
 
   3.This package makes it possible to use ready-made views with a synchronous script based on the Django Rest framework:
 
-    pip install monobank-api-client[drf]
+    pip install python-monobank-client[drf]
 
   To get started, add the following packages to INSTALLED_APPS:
 
@@ -36,11 +38,11 @@ This framework is published at the PyPI, install it with pip:
   
   4.This package makes it possible to use ready-made routers with an asynchronous script based on the FastAPI framework:
 
-    pip install monobank-api-client[fastapi]
+    pip install python-monobank-client[fastapi]
 
   5.To install all packages at once:
 
-    pip install monobank-api-client[all]
+    pip install python-monobank-client[all]
 
 ## Usage
 
